@@ -1,0 +1,26 @@
+# Пример configuration.yaml Zigbee2MQTT для SONOFF ZBDongle-E (чип Silicon Labs): adapter: ember.
+# Это ПРИМЕР по документации: проверьте на своём стенде. Значения «ВАШ-…» подставьте сами.
+# Если вы используете приложение Zigbee2MQTT в Home Assistant, настройки со страницы конфигурации приложения
+# имеют приоритет над этим файлом.
+#
+# Прошивка стика 7.4 и новее: ember. Параметр adapter: ezsp устарел.
+
+homeassistant:
+  enabled: true            # автоматическое обнаружение устройств в Home Assistant (нужна интеграция MQTT)
+
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://core-mosquitto:1883   # Mosquitto broker в Home Assistant OS
+  user: ВАШ-ПОЛЬЗОВАТЕЛЬ-MQTT
+  password: ВАШ-ПАРОЛЬ-MQTT            # не публикуйте реальный пароль
+
+serial:
+  port: /dev/serial/by-id/ВАШ-СТИК     # Настройки → Система → Оборудование → Системное оборудование
+  adapter: ember
+
+advanced:
+  channel: 15              # рекомендованы 11, 15, 20, 25; учтите соседнюю сеть Wi-Fi 2,4 ГГц
+  network_key: GENERATE    # ключ создаётся при первом запуске; не публикуйте его, сохраните в резервной копии
+
+frontend:
+  enabled: true

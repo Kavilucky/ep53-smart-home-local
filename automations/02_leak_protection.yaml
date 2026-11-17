@@ -1,0 +1,30 @@
+# Сценарий 2: защита от протечки.
+# ПРИМЕР по документации Home Assistant: проверьте на своём стенде.
+# Замените сущности: binary_sensor.washer_leak_water_leak (датчик воды), switch.washer_plug (розетка стиральной машины),
+# valve.water_main (кран с электроприводом: строки с ним нужны, только если кран у вас есть, иначе удалите их).
+# Внутри квартиры всё работает без интернета. Уведомление на телефон (notify.mobile_app_…) требует интернета,
+# если вас нет дома; persistent_notification виден в интерфейсе Home Assistant и без него.
+
+- id: leak_protection
+  alias: Протечка, отключить машину и перекрыть воду
+  description: "Датчик воды сработал: выключить розетку стиральной машины, закрыть кран, оповестить."
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.washer_leak_water_leak
+      to: "on"
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.washer_plug
+    - action: valve.close_valve
+      target:
+        entity_id: valve.water_main
+    - action: persistent_notification.create
+      data:
+        title: Протечка
+        message: Датчик под стиральной машиной сообщил о воде. Розетка отключена, кран закрыт.
+    # Необязательно: уведомление на телефон (замените имя службы на своё из Настройки → Службы уведомлений).
+    # - action: notify.mobile_app_ВАШ_ТЕЛЕФОН
+    #   data:
+    #     message: Протечка под стиральной машиной

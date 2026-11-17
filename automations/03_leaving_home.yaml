@@ -1,0 +1,52 @@
+# Сценарий 3: «ухожу из дома» и охрана по датчику открытия двери.
+# ПРИМЕР по документации Home Assistant: проверьте на своём стенде.
+# Сначала добавьте homeassistant/helpers.example.yaml (input_button.leaving_home и input_boolean.away_mode).
+# Замените сущности: switch.heater_plug, switch.iron_plug (розетки обогревателя и утюга),
+# binary_sensor.front_door_contact (датчик открытия двери), siren.hallway (сирена; если её нет, удалите действие).
+# Внутри квартиры всё работает без интернета; интернет нужен только уведомлению на телефон вне дома.
+# Вместо виртуальной кнопки можно выбрать триггер «Устройство» для физической Zigbee-кнопки в редакторе автоматизации.
+
+- id: leaving_home
+  alias: Ухожу из дома
+  description: Выключить свет и опасные приборы, включить режим охраны.
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_button.leaving_home
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id: all
+    - action: switch.turn_off
+      target:
+        entity_id:
+          - switch.heater_plug
+          - switch.iron_plug
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.away_mode
+
+- id: away_door_opened
+  alias: Охрана, дверь открыта в режиме «никого нет дома»
+  description: Если дверь открылась при включённом режиме охраны, включить сирену и отправить сообщение.
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.front_door_contact
+      to: "on"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.away_mode
+      state: "on"
+  actions:
+    - action: siren.turn_on
+      target:
+        entity_id: siren.hallway
+    - action: persistent_notification.create
+      data:
+        title: Охрана
+        message: Дверь открылась, пока режим охраны включён.
+    # Необязательно: уведомление на телефон (замените имя службы на своё).
+    # - action: notify.mobile_app_ВАШ_ТЕЛЕФОН
+    #   data:
+    #     message: Дверь открылась, пока вас нет дома
